@@ -1,0 +1,80 @@
+# =============================================================================
+# Zendesk -> Snowflake pipeline configuration
+# =============================================================================
+# Adding a new pipeline = adding a new YAML file in this directory.
+# The DAG factory reads every *.yml here and generates an Airflow DAG for each.
+# =============================================================================
+
+dag:
+  dag_id: zendesk_snowflake_pipeline
+  description: "Ingest Zendesk data via Fivetran, transform with dbt, load to Snowflake"
+  schedule_interval: "0 */2 * * *"        # every 2 hours
+  start_date: "2024-01-01"
+  catchup: false
+  max_active_runs: 1
+  tags:
+    - zendesk
+    - fivetran
+    - dbt
+    - snowflake
+
+default_args:
+  owner: data-engineering
+  depends_on_past: false
+  email_on_failure: true
+  email_on_retry: false
+  retries: 2
+  retry_delay_minutes: 5
+
+# ---------------------------------------------------------------------------
+# Fivetran connectors to trigger before dbt runs.
+# Each entry becomes a TaskGroup with a trigger + sensor pair.
+# Connectors run in parallel; dbt waits for all of them to finish.
+# ---------------------------------------------------------------------------
+fivetran:
+  connection_id: fivetran_default
+  connectors:
+    - id: "{{ var.value.zendesk_fivetran_connector_id }}"
+      name: zendesk_support          # used as task-group name
+      poke_interval_seconds: 60
+      timeout_seconds: 3600
+
+# ---------------------------------------------------------------------------
+# dbt configuration
+# ---------------------------------------------------------------------------
+dbt:
+  project_dir: "{{ var.value.dbt_project_dir }}"
+  profiles_dir: "{{ var.value.dbt_profiles_dir }}"
+  target: prod
+
+  # Steps execute sequentially in the order listed.
+  # Each step maps to a `dbt <command> [args]` invocation.
+  steps:
+    - command: seed
+      description: "Load static reference / seed data"
+
+    - command: source
+      args: "freshness"
+      description: "Verify Fivetran data freshness"
+
+    # Run groups execute as a TaskGroup.  Steps within a group run
+    # sequentially (in order), enabling staged builds.
+    - command: run
+      description: "Build staging and mart models"
+      selectors:
+        - tag:staging
+        - tag:marts
+
+    - command: test
+      description: "Run all schema and custom tests"
+
+# ---------------------------------------------------------------------------
+# Notifications / callbacks
+# ---------------------------------------------------------------------------
+callbacks:
+  on_failure:
+    module: zendesk_callbacks
+    function: on_failure_callback
+  on_success:
+    module: zendesk_callbacks
+    function: on_success_callback

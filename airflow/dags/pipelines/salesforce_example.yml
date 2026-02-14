@@ -1,0 +1,59 @@
+# =============================================================================
+# Example: second connector pipeline (Salesforce -> Snowflake)
+# =============================================================================
+# Drop a new YAML file here to spin up a completely independent DAG
+# with zero Python code changes.
+# =============================================================================
+
+dag:
+  dag_id: salesforce_snowflake_pipeline
+  description: "Ingest Salesforce data via Fivetran, transform with dbt, load to Snowflake"
+  schedule_interval: "0 */4 * * *"
+  start_date: "2024-01-01"
+  catchup: false
+  max_active_runs: 1
+  tags:
+    - salesforce
+    - fivetran
+    - dbt
+    - snowflake
+
+default_args:
+  owner: data-engineering
+  depends_on_past: false
+  email_on_failure: true
+  email_on_retry: false
+  retries: 2
+  retry_delay_minutes: 5
+
+fivetran:
+  connection_id: fivetran_default
+  connectors:
+    - id: "{{ var.value.salesforce_fivetran_connector_id }}"
+      name: salesforce_crm
+      poke_interval_seconds: 60
+      timeout_seconds: 7200
+
+dbt:
+  project_dir: "{{ var.value.dbt_project_dir }}"
+  profiles_dir: "{{ var.value.dbt_profiles_dir }}"
+  target: prod
+
+  steps:
+    - command: seed
+
+    - command: run
+      selectors:
+        - tag:salesforce_staging
+        - tag:salesforce_marts
+
+    - command: test
+      args: "--select tag:salesforce"
+
+callbacks:
+  on_failure:
+    module: zendesk_callbacks
+    function: on_failure_callback
+  on_success:
+    module: zendesk_callbacks
+    function: on_success_callback
