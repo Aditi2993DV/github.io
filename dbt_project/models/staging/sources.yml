@@ -1,0 +1,95 @@
+version: 2
+
+sources:
+  - name: zendesk
+    description: >
+      Raw Zendesk data ingested by Fivetran into Snowflake.
+      The Fivetran connector syncs these tables on a scheduled interval.
+    database: "{{ var('zendesk_database', 'ZENDESK_RAW') }}"
+    schema: "{{ var('zendesk_schema', 'ZENDESK') }}"
+    loader: fivetran
+    loaded_at_field: _fivetran_synced
+
+    freshness:
+      warn_after: { count: 12, period: hour }
+      error_after: { count: 24, period: hour }
+
+    tables:
+      - name: ticket
+        description: Core Zendesk support tickets
+        columns:
+          - name: id
+            description: Primary key - unique ticket identifier
+            tests:
+              - unique
+              - not_null
+
+      - name: user
+        description: Zendesk users (end-users, agents, admins)
+        columns:
+          - name: id
+            description: Primary key - unique user identifier
+            tests:
+              - unique
+              - not_null
+
+      - name: organization
+        description: Zendesk organizations that users belong to
+        columns:
+          - name: id
+            description: Primary key - unique organization identifier
+            tests:
+              - unique
+              - not_null
+
+      - name: ticket_comment
+        description: Comments/replies on tickets (public and internal)
+        columns:
+          - name: id
+            description: Primary key - unique comment identifier
+            tests:
+              - unique
+              - not_null
+
+      - name: group
+        description: Agent groups in Zendesk
+        columns:
+          - name: id
+            description: Primary key - unique group identifier
+            tests:
+              - unique
+              - not_null
+
+      - name: brand
+        description: Brands configured in Zendesk
+        columns:
+          - name: id
+            description: Primary key - unique brand identifier
+            tests:
+              - unique
+              - not_null
+
+      - name: ticket_metric
+        description: Ticket timing metrics (reply time, resolution time, etc.)
+        columns:
+          - name: ticket_id
+            description: Foreign key to ticket
+            tests:
+              - unique
+              - not_null
+
+      - name: ticket_tag
+        description: Tags applied to tickets
+        columns:
+          - name: ticket_id
+            description: Foreign key to ticket
+            tests:
+              - not_null
+
+      - name: ticket_field_history
+        description: Historical changes to ticket fields
+        columns:
+          - name: ticket_id
+            description: Foreign key to ticket
+            tests:
+              - not_null

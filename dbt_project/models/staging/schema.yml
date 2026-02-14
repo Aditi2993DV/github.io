@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: stg_zendesk__tickets
+    description: Cleaned and renamed Zendesk tickets from the Fivetran raw layer.
+    columns:
+      - name: ticket_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: ticket_status
+        description: "Current ticket status: new, open, pending, hold, solved, closed"
+        tests:
+          - accepted_values:
+              values: ["new", "open", "pending", "hold", "solved", "closed"]
+      - name: ticket_priority
+        description: "Ticket priority: low, normal, high, urgent"
+        tests:
+          - accepted_values:
+              values: ["low", "normal", "high", "urgent"]
+              config:
+                where: "ticket_priority is not null"
+
+  - name: stg_zendesk__users
+    description: Cleaned and renamed Zendesk users from the Fivetran raw layer.
+    columns:
+      - name: user_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: user_role
+        description: "Zendesk role: end-user, agent, admin"
+        tests:
+          - accepted_values:
+              values: ["end-user", "agent", "admin"]
+
+  - name: stg_zendesk__organizations
+    description: Cleaned and renamed Zendesk organizations from the Fivetran raw layer.
+    columns:
+      - name: organization_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_zendesk__ticket_comments
+    description: Cleaned and renamed Zendesk ticket comments from the Fivetran raw layer.
+    columns:
+      - name: comment_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: ticket_id
+        description: Foreign key to stg_zendesk__tickets
+        tests:
+          - not_null
+
+  - name: stg_zendesk__groups
+    description: Cleaned and renamed Zendesk groups from the Fivetran raw layer.
+    columns:
+      - name: group_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_zendesk__brands
+    description: Cleaned and renamed Zendesk brands from the Fivetran raw layer.
+    columns:
+      - name: brand_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_zendesk__ticket_metrics
+    description: Cleaned and renamed Zendesk ticket metrics from the Fivetran raw layer.
+    columns:
+      - name: ticket_id
+        description: Primary key (one metrics row per ticket)
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_zendesk__ticket_tags
+    description: Cleaned and renamed Zendesk ticket tags from the Fivetran raw layer.
+    columns:
+      - name: ticket_id
+        description: Foreign key to stg_zendesk__tickets
+        tests:
+          - not_null
