@@ -47,13 +47,6 @@ Fivetran Connector ──sync──> Snowflake  ZENDESK_RAW.ZENDESK
 
 ```
 .
-├── snowflake/
-│   └── setup/
-│       ├── 01_create_databases.sql           # ZENDESK_RAW + ZENDESK_ANALYTICS databases
-│       ├── 02_create_schemas.sql             # STAGING / INTERMEDIATE / MARTS schemas
-│       ├── 03_create_roles_and_permissions.sql # FIVETRAN_ROLE, DBT_ROLE, ANALYST_ROLE
-│       └── 04_create_warehouse.sql           # ZENDESK_WH (X-SMALL, auto-suspend)
-│
 ├── dbt_project/
 │   ├── dbt_project.yml                       # Project config and materialization rules
 │   ├── packages.yml                          # fivetran/zendesk, fivetran/zendesk_source, dbt_utils
@@ -133,6 +126,9 @@ This pipeline follows the **ELT** (Extract, Load, Transform) pattern:
 ---
 
 ## Snowflake Setup
+
+> **Note:** The Snowflake platform scripts live on a separate branch: `claude/data-platform-setup-hVHtw`.
+> Check out that branch for the `snowflake/setup/` directory.
 
 Run the SQL scripts in `snowflake/setup/` in numbered order against your Snowflake account. They create:
 
@@ -473,7 +469,11 @@ cp .env.example .env
 
 **1. Provision Snowflake infrastructure**
 
-Run the setup scripts in order in a Snowflake worksheet (logged in as `SYSADMIN` / `SECURITYADMIN`):
+Check out the platform branch and run the setup scripts in order in a Snowflake worksheet (logged in as `SYSADMIN` / `SECURITYADMIN`):
+
+```bash
+git checkout claude/data-platform-setup-hVHtw
+```
 
 ```sql
 -- Run each file in sequence:
