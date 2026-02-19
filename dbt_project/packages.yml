@@ -1,0 +1,13 @@
+packages:
+  # Fivetran's official Zendesk dbt package
+  # Provides staging models and pre-built transformations for Fivetran-synced Zendesk data
+  - package: fivetran/zendesk
+    version: [">=0.17.0", "<0.18.0"]
+
+  # Fivetran's Zendesk source package (dependency of the above, listed explicitly)
+  - package: fivetran/zendesk_source
+    version: [">=0.12.0", "<0.13.0"]
+
+  # dbt utility packages
+  - package: dbt-labs/dbt_utils
+    version: [">=1.1.0", "<2.0.0"]

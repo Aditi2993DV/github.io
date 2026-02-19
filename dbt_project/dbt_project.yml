@@ -1,0 +1,44 @@
+name: zendesk_snowflake_pipeline
+version: '1.0.0'
+config-version: 2
+
+profile: zendesk_snowflake
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  # Fivetran Zendesk source schema/database overrides
+  zendesk_database: ZENDESK_RAW
+  zendesk_schema: ZENDESK
+
+models:
+  zendesk_snowflake_pipeline:
+    staging:
+      +schema: STAGING
+      +materialized: view
+      +tags: ["staging", "zendesk"]
+    intermediate:
+      +schema: INTERMEDIATE
+      +materialized: ephemeral
+      +tags: ["intermediate", "zendesk"]
+    marts:
+      +schema: MARTS
+      +materialized: table
+      +tags: ["marts", "zendesk"]
+
+  # Fivetran dbt_zendesk package configuration
+  zendesk:
+    +schema: STAGING
+    +materialized: view
+  zendesk_source:
+    +schema: STAGING
+    +materialized: view

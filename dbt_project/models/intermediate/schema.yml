@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: int_zendesk__ticket_enriched
+    description: >
+      Wide ticket record joining tickets to requesters, assignees,
+      organizations, groups, brands, and ticket metrics.
+
+  - name: int_zendesk__agent_performance
+    description: >
+      Per-agent aggregation of ticket volume, response time, resolution time,
+      and satisfaction metrics.
+
+  - name: int_zendesk__sla_compliance
+    description: >
+      Per-ticket SLA evaluation against priority-based targets for first reply
+      time and full resolution time.

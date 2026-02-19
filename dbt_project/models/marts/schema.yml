@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: dim_tickets
+    description: >
+      Dimension table for Zendesk tickets with full context including requester,
+      assignee, organization, group, brand, and tags. One row per ticket.
+    columns:
+      - name: ticket_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_users
+    description: >
+      Dimension table for Zendesk users (end-users, agents, admins) with
+      organization details. One row per user.
+    columns:
+      - name: user_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_organizations
+    description: >
+      Dimension table for Zendesk organizations with aggregated ticket counts.
+      One row per organization.
+    columns:
+      - name: organization_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: total_tickets
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+  - name: fct_ticket_metrics
+    description: >
+      Fact table with ticket-level operational metrics including response times,
+      resolution times, SLA compliance, and satisfaction. One row per ticket.
+    columns:
+      - name: ticket_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_agent_performance
+    description: >
+      Fact table with per-agent performance metrics including ticket volume,
+      response/resolution times, and satisfaction scores.
+    columns:
+      - name: agent_id
+        description: Primary key
+        tests:
+          - not_null
+
+  - name: fct_daily_ticket_summary
+    description: >
+      Incremental daily summary of ticket volume, channel mix, response times,
+      SLA compliance, and satisfaction. One row per day.
+    columns:
+      - name: summary_date
+        description: Primary key - calendar date
+        tests:
+          - unique
+          - not_null

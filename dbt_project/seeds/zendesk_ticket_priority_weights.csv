@@ -1,0 +1,5 @@
+priority,first_reply_target_minutes,resolution_target_minutes,priority_weight
+urgent,30,240,4
+high,60,480,3
+normal,120,1440,2
+low,480,2880,1

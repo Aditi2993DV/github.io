@@ -1,0 +1,24 @@
+zendesk_snowflake:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+      role: DBT_ROLE
+      warehouse: ZENDESK_WH
+      database: ZENDESK_ANALYTICS
+      schema: STAGING
+      threads: 4
+
+    prod:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+      role: DBT_ROLE
+      warehouse: ZENDESK_WH
+      database: ZENDESK_ANALYTICS
+      schema: STAGING
+      threads: 8
